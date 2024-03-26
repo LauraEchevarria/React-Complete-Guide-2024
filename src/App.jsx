@@ -3,22 +3,38 @@ import GameBoard from "./components/GameBoard"
 import Player from "./components/Player"
 import Log from "./components/Log"
 
-function App() {
-  const [activePlayer, setActivePlayer] = useState('X');
-  //const [gameTurns, setGameTurns] = useState([]);
+function deriveActivePlayer(gameTurns) {
+  let currentPlayer = 'X';
+  if(gameTurns.length>0 && gameTurns[0].player === 'X') currentPlayer = 'O';
 
-  const handleActivePlayer = () => setActivePlayer(prevSymbol => prevSymbol==='X' ? 'O' : 'X');
+  return currentPlayer;
+}
+
+function App() {
+  //const [activePlayer, setActivePlayer] = useState('X');
+  const [gameTurns, setGameTurns] = useState([]);
+  
+  const handleActivePlayer = (rowIndex, colIndex) => {
+    //setActivePlayer(prevSymbol => prevSymbol==='X' ? 'O' : 'X');
+    setGameTurns(prevTurns => {
+      let currentPlayer = deriveActivePlayer(gameTurns);
+
+      const updatedTurns = [{square: {row: rowIndex, col: colIndex}, player: currentPlayer}, ...prevTurns];
+
+      return updatedTurns;
+    });
+  };
 
   return (
     <main>
       <div id="game-container">
         <ol id="players" className="highlight-player">
-          <Player initialName="Player 1" symbol="X" isActive={activePlayer==='X'} />
-          <Player initialName="Player 2" symbol="0" isActive={activePlayer==='O'} />
+          <Player initialName="Player 1" symbol="X" isActive={deriveActivePlayer(gameTurns)==='X'} />
+          <Player initialName="Player 2" symbol="0" isActive={deriveActivePlayer(gameTurns)==='O'} />
         </ol>
-        <GameBoard activeSymbol={activePlayer} onSelectCell={handleActivePlayer} />
+        <GameBoard onSelectCell={handleActivePlayer} turns={gameTurns} />
       </div>
-      <Log />
+      <Log turns={gameTurns} />
     </main>
   )
 }
